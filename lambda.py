@@ -1,5 +1,5 @@
 # MARKDOWN CELL
-# # Restless Lambda Function Exercises
+# # Restless Python : Lambda Function Exercises
 # 
 # Welcome to your daily Python warm-up! Today, we're focusing on lambda functions. These exercises will help you understand and remember how to use lambda functions effectively. Let's dive in!
 
