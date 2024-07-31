@@ -12,6 +12,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
     
     - name: Set up Python
       uses: actions/setup-python@v4
@@ -25,13 +27,22 @@ jobs:
     
     - name: Run JINC conversion
       run: |
-        for py_file in $(find . -name "*.py" -not -path "*/.*"); do
+        # Get the list of changed files
+        CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || true)
+        
+        for py_file in $CHANGED_FILES; do
+          # Skip jinc.py
+          if [[ "$py_file" == *"jinc.py"* ]]; then
+            echo "Skipping JINC program: $py_file"
+            continue
+          fi
+          
           ipynb_file="${py_file%.py}.ipynb"
-          if [ ! -f "$ipynb_file" ]; then
+          if [ ! -f "$ipynb_file" ] || [ "$py_file" -nt "$ipynb_file" ]; then
             echo "Converting $py_file to $ipynb_file"
             python jinc.py "$py_file" -o "$ipynb_file"
           else
-            echo "Notebook already exists for $py_file, skipping"
+            echo "Notebook is up to date for $py_file, skipping"
           fi
         done
     
