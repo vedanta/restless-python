@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         fetch-depth: 0
     
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.x'
     
@@ -49,9 +49,6 @@ jobs:
     
     - name: Generate README
       run: |
-        cat << EOF > generate_readme.py
-        ${{ steps.readme_generator.outputs.content }}
-        EOF
         python generate_readme.py
     
     - name: Commit and push if changed
@@ -64,5 +61,13 @@ jobs:
         else
           CHANGED_NOTEBOOKS=$(git diff --cached --name-only | grep '\.ipynb$' | xargs)
           git commit -m "Update Jupyter notebooks and README: $CHANGED_NOTEBOOKS"
-          git push
+          for i in {1..5}; do
+            if git push; then
+              echo "Push successful"
+              break
+            else
+              echo "Push failed, retrying in 30 seconds..."
+              sleep 30
+            fi
+          done
         fi
