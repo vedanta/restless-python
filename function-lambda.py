@@ -1,4 +1,4 @@
-#  DESCRIPTION: This program contains a series of exercises to practice lambda functions in Python, ranging from simple to very advanced levels. Each example is separated into its own code cell with detailed explanations.
+#  DESCRIPTION: This program contains a series of exercises to practice lambda functions in Python
 
 # MARKDOWN CELL
 # # Lambda Function Exercises
