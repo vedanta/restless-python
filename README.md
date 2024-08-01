@@ -2,5 +2,4 @@
 
 | Notebook | Description | Open in Colab |
 |----------|-------------|---------------|
-| restless-python-lambda-11.ipynb | This notebook demonstrates how to use Python with AWS Lambda. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vedanta/restless-python/blob/main/restless-python-lambda-11.ipynb) |
-| restless-python-lambda.ipynb | This notebook demonstrates how to use Python with AWS Lambda. | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vedanta/restless-python/blob/main/restless-python-lambda.ipynb) |
+| lambda.ipynb | No description available | [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/vedanta/restless-python/blob/main/lambda.ipynb) |
