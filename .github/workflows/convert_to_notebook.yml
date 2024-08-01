@@ -47,14 +47,24 @@ jobs:
           fi
         done
     
+    - name: Check generate_readme.py
+      run: |
+        echo "Content of generate_readme.py:"
+        cat generate_readme.py
+    
     - name: Generate README
       run: |
-        python generate_readme.py
+        echo "Current directory contents:"
+        ls -la
+        echo "Running generate_readme.py"
+        python -v generate_readme.py
+        echo "After running generate_readme.py"
+        ls -la
         if [ ! -f README.md ]; then
           echo "README.md was not generated. Exiting."
           exit 1
         fi
-        echo "README.md generated successfully."
+        echo "README.md generated successfully. Content:"
         cat README.md
     
     - name: Commit and push if changed
