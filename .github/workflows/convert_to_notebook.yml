@@ -1,4 +1,4 @@
-name: Convert Python to Jupyter Notebook
+name: Convert Python to Jupyter Notebook and Update README
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  convert-to-notebook:
+  convert-and-update:
     runs-on: ubuntu-latest
     
     steps:
@@ -30,11 +30,9 @@ jobs:
     
     - name: Run JINC conversion
       run: |
-        # Get the list of changed files
         CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || true)
         
         for py_file in $CHANGED_FILES; do
-          # Skip jinc.py
           if [[ "$py_file" == *"jinc.py"* ]]; then
             echo "Skipping JINC program: $py_file"
             continue
@@ -49,15 +47,22 @@ jobs:
           fi
         done
     
+    - name: Generate README
+      run: |
+        cat << EOF > generate_readme.py
+        ${{ steps.readme_generator.outputs.content }}
+        EOF
+        python generate_readme.py
+    
     - name: Commit and push if changed
       run: |
         git config --global user.name 'GitHub Actions'
         git config --global user.email 'github-actions@github.com'
-        if [[ -n $(git status -s) ]]; then
-          git add -A
-          CHANGED_NOTEBOOKS=$(git diff --cached --name-only | grep '\.ipynb$' | xargs)
-          git commit -m "Update Jupyter notebooks: $CHANGED_NOTEBOOKS"
-          git push
-        else
+        git add -A
+        if git diff --staged --quiet; then
           echo "No changes to commit"
+        else
+          CHANGED_NOTEBOOKS=$(git diff --cached --name-only | grep '\.ipynb$' | xargs)
+          git commit -m "Update Jupyter notebooks and README: $CHANGED_NOTEBOOKS"
+          git push
         fi
