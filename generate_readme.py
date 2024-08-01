@@ -1,24 +1,23 @@
-
 import os
-import re
+import json
+import nbformat
 
-def extract_description(py_file):
-    with open(py_file, 'r') as file:
-        content = file.read()
-        match = re.search(r'"""(.*?)"""', content, re.DOTALL)
-        if match:
-            return match.group(1).strip()
+def extract_description(notebook_file):
+    with open(notebook_file, 'r', encoding='utf-8') as f:
+        nb = nbformat.read(f, as_version=4)
+    
+    if len(nb.cells) > 0 and nb.cells[0].cell_type == 'markdown':
+        content = nb.cells[0].source
+        if content.startswith('# Description'):
+            return content.split('\n', 1)[1].strip()
+    
     return "No description available"
 
 def generate_readme():
     notebooks = []
     for file in os.listdir('.'):
         if file.endswith('.ipynb'):
-            py_file = file.replace('.ipynb', '.py')
-            if os.path.exists(py_file):
-                description = extract_description(py_file)
-            else:
-                description = "No description available"
+            description = extract_description(file)
             notebooks.append((file, description))
 
     with open('README.md', 'w') as readme:

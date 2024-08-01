@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 JINC: Jupyter Interactive Notebook Creator
 
@@ -18,9 +19,13 @@ import os
 def create_notebook_cells(script):
     cells = []
     current_cell = {"type": None, "content": []}
+    description = None
 
     for line in script.split('\n'):
-        if line.startswith('# MARKDOWN CELL'):
+        if line.startswith('#  DESCRIPTION'):
+            description = line[14:].strip()  # Extract description
+            continue
+        elif line.startswith('# MARKDOWN CELL'):
             if current_cell["type"]:
                 cells.append(current_cell)
             current_cell = {"type": "markdown", "content": []}
@@ -37,7 +42,7 @@ def create_notebook_cells(script):
     if current_cell["type"]:
         cells.append(current_cell)
 
-    return cells
+    return cells, description
 
 def create_notebook(input_file, output_file):
     try:
@@ -54,7 +59,11 @@ def create_notebook(input_file, output_file):
     nb = nbf.v4.new_notebook()
 
     # Parse the script and create cells
-    cells = create_notebook_cells(script_content)
+    cells, description = create_notebook_cells(script_content)
+
+    # Add description as the first markdown cell if available
+    if description:
+        nb.cells.append(nbf.v4.new_markdown_cell(f"# Description\n\n{description}"))
 
     # Add cells to the notebook
     for cell in cells:
