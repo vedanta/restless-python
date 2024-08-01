@@ -28,8 +28,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install nbformat
 
-    - name: Run JINC conversion
+    - name: Run JINC conversion and handle deletions
       run: |
+        # Convert Python files to notebooks
         for py_file in $(find . -name "*.py" -not -path "*/.*"); do
           if [[ "$py_file" == *"jinc.py"* ]] || [[ "$py_file" == *"generate_readme.py"* ]]; then
             echo "Skipping $py_file"
@@ -42,6 +43,15 @@ jobs:
             python jinc.py "$py_file" -o "$ipynb_file"
           else
             echo "Notebook is up to date for $py_file, skipping"
+          fi
+        done
+
+        # Delete orphaned notebooks
+        for ipynb_file in $(find . -name "*.ipynb" -not -path "*/.*"); do
+          py_file="${ipynb_file%.ipynb}.py"
+          if [ ! -f "$py_file" ]; then
+            echo "Deleting orphaned notebook: $ipynb_file"
+            git rm "$ipynb_file"
           fi
         done
 
