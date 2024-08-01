@@ -9,7 +9,9 @@ def extract_description(notebook_file):
     if len(nb.cells) > 0 and nb.cells[0].cell_type == 'markdown':
         content = nb.cells[0].source
         if content.startswith('# Description'):
-            return content.split('\n', 1)[1].strip()
+            description = content.split('\n', 1)[1].strip()
+            # Remove leading colon if present
+            return description[1:].strip() if description.startswith(':') else description
     
     return "No description available"
 

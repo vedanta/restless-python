@@ -28,21 +28,33 @@ jobs:
         python -m pip install --upgrade pip
         pip install nbformat
 
-    - name: Run JINC conversion and handle deletions
+    - name: Run JINC conversion and handle changes
       run: |
-        # Convert Python files to notebooks
-        for py_file in $(find . -name "*.py" -not -path "*/.*"); do
+        # Get list of changed Python files
+        CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || true)
+        
+        # Convert changed Python files to notebooks
+        for py_file in $CHANGED_FILES; do
           if [[ "$py_file" == *"jinc.py"* ]] || [[ "$py_file" == *"generate_readme.py"* ]]; then
             echo "Skipping $py_file"
             continue
           fi
           
           ipynb_file="${py_file%.py}.ipynb"
-          if [ ! -f "$ipynb_file" ] || [ "$py_file" -nt "$ipynb_file" ]; then
-            echo "Converting $py_file to $ipynb_file"
+          echo "Converting $py_file to $ipynb_file"
+          python jinc.py "$py_file" -o "$ipynb_file"
+        done
+
+        # Convert any new Python files to notebooks
+        for py_file in $(find . -name "*.py" -not -path "*/.*"); do
+          if [[ "$py_file" == *"jinc.py"* ]] || [[ "$py_file" == *"generate_readme.py"* ]]; then
+            continue
+          fi
+          
+          ipynb_file="${py_file%.py}.ipynb"
+          if [ ! -f "$ipynb_file" ]; then
+            echo "Converting new file $py_file to $ipynb_file"
             python jinc.py "$py_file" -o "$ipynb_file"
-          else
-            echo "Notebook is up to date for $py_file, skipping"
           fi
         done
 
