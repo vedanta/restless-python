@@ -27,12 +27,10 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install nbformat
-    
+
     - name: Run JINC conversion
       run: |
-        CHANGED_FILES=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep '\.py$' || true)
-        
-        for py_file in $CHANGED_FILES; do
+        for py_file in $(find . -name "*.py" -not -path "*/.*"); do
           if [[ "$py_file" == *"jinc.py"* ]] || [[ "$py_file" == *"generate_readme.py"* ]]; then
             echo "Skipping $py_file"
             continue
@@ -46,27 +44,17 @@ jobs:
             echo "Notebook is up to date for $py_file, skipping"
           fi
         done
-    
-    - name: Check generate_readme.py
-      run: |
-        echo "Content of generate_readme.py:"
-        cat generate_readme.py
-    
+
     - name: Generate README
       run: |
-        echo "Current directory contents:"
-        ls -la
-        echo "Running generate_readme.py"
-        python -v generate_readme.py
-        echo "After running generate_readme.py"
-        ls -la
+        python generate_readme.py
         if [ ! -f README.md ]; then
           echo "README.md was not generated. Exiting."
           exit 1
         fi
         echo "README.md generated successfully. Content:"
         cat README.md
-    
+
     - name: Commit and push if changed
       run: |
         git config --global user.name 'GitHub Actions'
@@ -75,15 +63,6 @@ jobs:
         if git diff --staged --quiet; then
           echo "No changes to commit"
         else
-          CHANGED_FILES=$(git diff --cached --name-only | xargs)
-          git commit -m "Update Jupyter notebooks and README: $CHANGED_FILES"
-          for i in {1..5}; do
-            if git push; then
-              echo "Push successful"
-              break
-            else
-              echo "Push failed, retrying in 30 seconds..."
-              sleep 30
-            fi
-          done
+          git commit -m "Update Jupyter notebooks and README"
+          git push
         fi
