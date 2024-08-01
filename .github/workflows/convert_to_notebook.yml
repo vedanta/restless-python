@@ -6,7 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-# Add this permissions block
 permissions:
   contents: write
 
@@ -56,7 +55,8 @@ jobs:
         git config --global user.email 'github-actions@github.com'
         if [[ -n $(git status -s) ]]; then
           git add -A
-          git commit -m "Convert Python scripts to Jupyter notebooks"
+          CHANGED_NOTEBOOKS=$(git diff --cached --name-only | grep '\.ipynb$' | xargs)
+          git commit -m "Update Jupyter notebooks: $CHANGED_NOTEBOOKS"
           git push
         else
           echo "No changes to commit"
